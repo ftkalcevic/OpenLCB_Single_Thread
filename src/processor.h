@@ -167,6 +167,18 @@
     #define EEPROMbegin EEPROM.begin(1000)
     #define EEPROMcommit EEPROM.commit()
 
+// STM32F469xx (Discovery board)
+#elif defined STM32F469xx
+#ifdef ENABLE_MESSAGE_PRAGMAS 
+    #pragma message("STM32F469xx selected ")
+#endif
+
+    #include "main.h"
+    #include "STM32F469xx/can.h"
+
+//    #include "EEPROM.h"
+    #define REBOOT  HAL_NVIC_SystemReset() 
+    #define RAMEND  0x2004FFFF
 #else
     #define reboot
     #pragma message("No Processor selected ")
