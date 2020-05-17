@@ -25,7 +25,7 @@
 #ifndef CAN_BUS_H
 #define CAN_BUS_H
 
-#if defined(__AVR_AT90CAN128__)
+#if defined(__AVR_AT90CAN128__)   || defined(__AVR_ATmega64M1__)
 
 // Uncomment the line below to enable Debug Printing
 // #define CAN_DEBUG_PRINT_ENABLE
@@ -58,6 +58,15 @@
 
 #if F_CPU != 16000000UL
     #error	!!!! only 16 MHz crystal supported !!!!
+#endif
+
+
+#if defined(__AVR_ATmega64M1__)
+	#define NUM_MOB					6
+	#define FIRST_RECEIVE_MOB		3
+#else
+	#define NUM_MOB					15
+	#define FIRST_RECEIVE_MOB		5
 #endif
 
 
@@ -165,7 +174,7 @@ typedef struct {
 	uint8_t b1;		// msb
 } long_to_byte_t;
 
-#if defined(__AVR_AT90CAN128__)
+#if defined(__AVR_AT90CAN128__)  || defined(__AVR_ATmega64M1__)
   const uint8_t _speed_cnf[8][3] PROGMEM = {
 	{ 0x7E, 0x6E, 0x7F },   // 10 kbps
 	{ 0x62, 0x0C, 0x37 },   // 20 kbps

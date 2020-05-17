@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  * ****************************************************************************/
 
-#if defined(__AVR_AT90CAN128__)
+#if defined(__AVR_AT90CAN128__)   || defined(__AVR_ATmega64M1__)
 
 #include "CanBus.h"
 #include "Arduino.h"
@@ -95,7 +95,7 @@ uint8_t get_message(can_t *msg) {
 	// check if there is any waiting message
 	if(!_check_message()) return 0;
 	// find the MOb with the received message
-	for(mob = 0; mob < 15; mob++) {
+	for(mob = 0; mob < NUM_MOB; mob++) {
 		CANPAGE = mob << 4;
 		if (CANSTMOB & (1 << RXOK)) {
 			found = true;
@@ -161,7 +161,7 @@ uint8_t canbus_send_message( const can_t *msg)
 {
 	// check if there is any free MOb
 	uint8_t mob = _find_free_mob();
-	if (mob >= 15)
+	if (mob >= NUM_MOB)
 		return 0;
 
 	// load corresponding MOb page ...
@@ -266,7 +266,7 @@ uint8_t _find_free_mob(void) {
 	if(_transmission_in_progress) return 0xff;
   #endif
 	uint8_t i;
-	for(i = 0; i < 15; i++) {
+	for(i = 0; i < NUM_MOB; i++) {
 		// load MOb page
 		CANPAGE = i << 4;
 
@@ -319,10 +319,16 @@ bool _check_free_buffer(void) {
 
 #ifdef OVRIT_vect 
 ISR(OVRIT_vect) {}
+#elif CAN_TOVF_vect
+ISR(CAN_TOVF_vect) {}
 #endif
 
+#if defined(CANIT_vect) || defined(CAN_INT_vect)
 #ifdef CANIT_vect
 ISR(CANIT_vect) {
+#elif defined(CAN_INT_vect)
+ISR(CAN_INT_vect) {
+#endif
 	uint8_t canpage;
 	uint8_t mob;
 	if((CANHPMOB & 0xF0) != 0xF0) {
@@ -408,7 +414,7 @@ bool CanBus::disable_filter(uint8_t number) {
 			CANIE1 = 0;
 			CANIE2 = 0;
 			// disable all MObs
-			for(uint8_t i = 0; i < 15; i++) {
+			for(uint8_t i = 0; i < NUM_MOB; i++) {
 				CANPAGE = (i << 4);
 				// disable MOb (read-write required)
 				CANCDMOB &= 0;
@@ -654,7 +660,7 @@ bool CanBus::init() {
 	
 		//Clear all mailboxes. DEG 22 May 2011
 	uint8_t i;
-	for(i = 0; i < 15; ++i)
+	for(i = 0; i < NUM_MOB; ++i)
 	{
 		CANPAGE = (i << 4);
 		//clear any interrupt flags
@@ -680,7 +686,7 @@ bool CanBus::init() {
 		CANIDM4 = 0; //(1<<IDEMSK); 		// do not ignore standard frames
 		//set to receive, DLC, IDE
 		//set MOBs 5-14 to receive. Is this anything like ideal?
-		if(i >= 5)
+		if(i >= FIRST_RECEIVE_MOB)
 			CANCDMOB = (1 << CONMOB1) | (1 << IDE);
 		else
 			CANCDMOB = 0; //(1 << IDE);

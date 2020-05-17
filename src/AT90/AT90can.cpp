@@ -1,7 +1,7 @@
 // OpenLCB Adaptation of FlexCAN library
 // copyright DPH 2017
 
-#if defined(__AVR_AT90CAN128__)
+#if defined(__AVR_AT90CAN128__)  || defined(__AVR_ATmega64M1__)
 
 #include "Arduino.h"
 

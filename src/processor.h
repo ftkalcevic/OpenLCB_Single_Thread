@@ -17,7 +17,6 @@
 //#define ESTRING(s) F(s)     // alternate def
 //#define ESTRING(s) PSTR(s)  // alternate def
 
-
 // AVRs
 #ifdef ARDUINO_ARCH_AVR
 #ifdef ENABLE_MESSAGE_PRAGMAS 
@@ -62,6 +61,21 @@
     #pragma message("AT90CAN selected")
 #endif
     #define AT90CAN
+    #include <AT90/AT90can.h>
+
+// ATMEGA64M1
+#elif defined(__AVR_ATmega64M1__)
+#ifdef ENABLE_MESSAGE_PRAGMAS 
+    #pragma message("ATMEGA64M1 selected")
+#endif
+	#define ESTRING(s) s          // default conversion - nil
+	#include <avr/wdt.h>
+	#define REBOOT                   \
+	wdt_disable();					 \
+	wdt_enable(WDTO_15MS);   \
+	while (1) {}
+
+    #define AT90CAN		// atmega64m1 can is the same as the at90can
     #include <AT90/AT90can.h>
 
 // Teensies
@@ -155,7 +169,7 @@
 
 #else
     #define reboot
-
+    #pragma message("No Processor selected ")
 #endif
 
 #endif // CANlibrary_h
